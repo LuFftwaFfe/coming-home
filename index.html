@@ -1,0 +1,649 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>You're coming home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FFFDFB;
+    --powder:#CFE6F5;
+    --powder-deep:#8FC1E3;
+    --blush:#F9D8E3;
+    --blush-deep:#E9A9C0;
+    --ink:#39456B;
+    --muted:#8A90AC;
+    --stub:#EAF4FB;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(120% 60% at 12% 0%, var(--powder) 0%, rgba(207,230,245,0) 62%),
+      radial-gradient(110% 55% at 92% 8%, var(--blush) 0%, rgba(249,216,227,0) 58%),
+      var(--paper);
+    background-attachment:fixed;
+    color:var(--ink);
+    font-family:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    padding:22px 16px 40px;
+  }
+  .wrap{max-width:430px;margin:0 auto}
+
+  .ticket{
+    position:relative;
+    background:var(--paper);
+    border:1px solid rgba(143,193,227,.55);
+    border-radius:20px;
+    box-shadow:0 18px 40px -28px rgba(57,69,107,.55);
+    overflow:hidden;
+  }
+  .ticket-head{
+    display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+    padding:16px 20px 12px;
+    background:linear-gradient(100deg, var(--powder) 0%, var(--blush) 100%);
+  }
+  .ticket-head span{font-size:11px;letter-spacing:.14em;color:#4d5a80;white-space:nowrap}
+  .airline{font-family:"Fraunces",Georgia,serif;font-size:17px;letter-spacing:.01em}
+
+  .route{
+    display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+    gap:10px;padding:20px 20px 4px;
+  }
+  .iata{font-family:"Fraunces",Georgia,serif;font-size:34px;line-height:1}
+  .city{font-size:11px;color:var(--muted);margin-top:5px;letter-spacing:.06em}
+  .to{text-align:right}
+  .path{position:relative;height:26px;width:82px}
+  .path::before{
+    content:"";position:absolute;top:13px;left:0;right:0;height:0;
+    border-top:2px dotted var(--powder-deep);
+  }
+  .plane{position:absolute;top:2px;left:0;font-size:16px;transform:translateX(0)}
+  .stop{text-align:center;font-size:10px;color:var(--muted);letter-spacing:.1em;padding:2px 20px 0}
+
+  .perf{position:relative;margin:16px 0 0;height:1px;border-top:2px dashed rgba(143,193,227,.7)}
+  .perf::before,.perf::after{
+    content:"";position:absolute;top:-11px;width:20px;height:20px;border-radius:50%;
+    background:
+      radial-gradient(120% 60% at 12% 0%, var(--powder) 0%, rgba(207,230,245,0) 62%),
+      radial-gradient(110% 55% at 92% 8%, var(--blush) 0%, rgba(249,216,227,0) 58%),
+      var(--paper);
+    border:1px solid rgba(143,193,227,.55);
+  }
+  .perf::before{left:-11px}
+  .perf::after{right:-11px}
+
+  .stub{background:var(--stub);padding:22px 20px 24px;text-align:center}
+  .stub-label{font-size:11px;letter-spacing:.16em;color:var(--muted)}
+  .bigdays{font-family:"Fraunces",Georgia,serif;font-size:76px;line-height:.92;margin:6px 0 2px;font-variant-numeric:tabular-nums}
+  .bigdays small{font-size:16px;letter-spacing:.08em;font-family:"IBM Plex Mono",monospace}
+  .clock{font-size:15px;letter-spacing:.1em;color:#5a6789;font-variant-numeric:tabular-nums}
+  .landing{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.6}
+
+  .panel{
+    background:var(--paper);
+    border:1px solid rgba(233,169,192,.45);
+    border-radius:18px;padding:20px;
+    box-shadow:0 14px 34px -30px rgba(57,69,107,.6);
+  }
+  h2{font-family:"Fraunces",Georgia,serif;font-weight:400;font-size:21px;margin:0 0 12px}
+  p{font-size:13.5px;line-height:1.65;margin:0 0 12px;color:#4f5a7d}
+
+  .bar{position:relative;height:10px;border-radius:99px;background:var(--powder);margin:26px 0 8px}
+  .fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--powder-deep),var(--blush-deep));width:0%}
+  .marker{position:absolute;top:-22px;transform:translateX(-50%);font-size:15px}
+  .ends{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);letter-spacing:.05em}
+  .tally{display:flex;gap:12px;margin-top:20px}
+  .tally div{flex:1;background:var(--stub);border-radius:14px;padding:14px 10px;text-align:center}
+  .tally b{display:block;font-family:"Fraunces",serif;font-size:27px;font-weight:400;line-height:1.1}
+  .tally span{font-size:10.5px;color:var(--muted);letter-spacing:.06em}
+
+  ul.plans{list-style:none;margin:0;padding:0}
+  ul.plans li{
+    display:flex;gap:12px;align-items:flex-start;
+    padding:13px 0;border-bottom:1px dashed rgba(143,193,227,.55);
+    font-size:13.5px;line-height:1.5;
+  }
+  ul.plans li:last-child{border-bottom:0}
+  ul.plans .dot{width:9px;height:9px;border-radius:50%;background:var(--blush-deep);margin-top:5px;flex:0 0 auto}
+  ul.plans li:nth-child(even) .dot{background:var(--powder-deep)}
+  ul.plans em{font-style:normal;color:var(--muted)}
+
+  .dates{margin:0;padding:0;list-style:none}
+  .dates li{display:flex;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px dashed rgba(233,169,192,.5);font-size:13px}
+  .dates li:last-child{border-bottom:0}
+  .dates em{font-style:normal;color:var(--muted);font-size:11.5px;white-space:nowrap}
+
+  .quote{
+    margin:18px 0 0;padding:20px 18px;border-radius:18px;
+    background:linear-gradient(120deg, rgba(207,230,245,.6), rgba(249,216,227,.6));
+    font-family:"Fraunces",Georgia,serif;font-size:16.5px;line-height:1.55;
+    text-align:center;
+  }
+  .quote .qtext{display:block}
+  .quote .qmeta{display:block;margin-top:10px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.12em;color:#6d7796}
+
+  nav{display:flex;gap:6px;margin:20px 0 18px;justify-content:center;flex-wrap:wrap}
+  nav button{
+    font-family:inherit;font-size:11.5px;letter-spacing:.06em;
+    padding:9px 13px;border-radius:99px;cursor:pointer;
+    border:1px solid rgba(143,193,227,.7);background:var(--paper);color:#5a6789;
+  }
+  nav button[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+  nav button:focus-visible{outline:2px solid var(--blush-deep);outline-offset:2px}
+
+  .page[hidden]{display:none}
+  footer{text-align:center;font-size:10.5px;color:var(--muted);margin-top:22px;letter-spacing:.05em}
+
+  @media (prefers-reduced-motion:no-preference){
+    .plane{transition:transform 1.4s cubic-bezier(.4,0,.2,1)}
+    .fill{transition:width 1.6s cubic-bezier(.4,0,.2,1)}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav role="tablist" aria-label="Sections">
+    <button role="tab" aria-selected="true" data-page="p1">Countdown</button>
+    <button role="tab" aria-selected="false" data-page="p2">Days apart</button>
+    <button role="tab" aria-selected="false" data-page="p3">When you land</button>
+    <button role="tab" aria-selected="false" data-page="p4">Dates</button>
+  </nav>
+
+  <!-- PAGE 1 -->
+  <section class="page" id="p1">
+    <div class="ticket">
+      <div class="ticket-head">
+        <div class="airline" id="head1">You're coming home</div>
+        <span>UL &middot; MEL&ndash;BLR</span>
+      </div>
+      <div class="route">
+        <div>
+          <div class="iata">MEL</div>
+          <div class="city">Melbourne</div>
+        </div>
+        <div class="path"><div class="plane" id="plane">&#9992;</div></div>
+        <div class="to">
+          <div class="iata">BLR</div>
+          <div class="city">Bengaluru</div>
+        </div>
+      </div>
+      <div class="stop">via Colombo</div>
+      <div class="perf"></div>
+      <div class="stub">
+        <div class="stub-label" id="stubLabel">days until you're back</div>
+        <div class="bigdays" id="days">&mdash;</div>
+        <div class="clock" id="clock">--h --m --s</div>
+        <div class="landing">You land Tuesday, 24 November 2026<br>counted in Bengaluru time</div>
+      </div>
+    </div>
+    <div class="quote"><span class="qtext" id="q1"></span><span class="qmeta" id="m1"></span></div>
+  </section>
+
+  <!-- PAGE 2 -->
+  <section class="page" id="p2" hidden>
+    <div class="panel">
+      <h2 id="head2">How far along you are</h2>
+      <p>You left on 14 July 2026. The whole stretch apart is 133 days, and this is where we're standing in it right now.</p>
+      <div class="bar">
+        <div class="marker" id="marker">&#9992;</div>
+        <div class="fill" id="fill"></div>
+      </div>
+      <div class="ends"><span>14 Jul</span><span>24 Nov</span></div>
+      <div class="tally">
+        <div><b id="gone">&mdash;</b><span>days gone</span></div>
+        <div><b id="left">&mdash;</b><span>days left</span></div>
+        <div><b id="pct">&mdash;</b><span>done</span></div>
+      </div>
+    </div>
+    <div class="quote"><span class="qtext" id="q2"></span><span class="qmeta" id="m2"></span></div>
+  </section>
+
+  <!-- PAGE 3 -->
+  <section class="page" id="p3" hidden>
+    <div class="panel">
+      <h2 id="head3">The list for when you land</h2>
+      <p>None of this is negotiable. It's been sitting here since July.</p>
+      <ul class="plans">
+        <li><span class="dot"></span>Matcha</li>
+        <li><span class="dot"></span>Booze</li>
+        <li><span class="dot"></span>December trip</li>
+        <li><span class="dot"></span>Reels</li>
+        <li><span class="dot"></span>Bedrots</li>
+        <li><span class="dot"></span>Mysore day</li>
+        <li><span class="dot"></span>Temple run</li>
+        <li><span class="dot"></span>Sleepovers</li>
+      </ul>
+    </div>
+    <div class="quote"><span class="qtext" id="q3"></span><span class="qmeta" id="m3"></span></div>
+  </section>
+
+  <!-- PAGE 4 -->
+  <section class="page" id="p4" hidden>
+    <div class="panel">
+      <h2 id="head4">Dates that matter</h2>
+      <ul class="dates">
+        <li><span>You flew out to Melbourne</span><em>14 Jul 2026</em></li>
+        <li><span>You board in Melbourne</span><em>23 Nov 2026</em></li>
+        <li><span>You land in Bengaluru</span><em>24 Nov 2026</em></li>
+        <li><span>The trip</span><em>Dec 2026</em></li>
+      </ul>
+    </div>
+    <div class="quote"><span class="qtext" id="q4"></span><span class="qmeta" id="m4"></span></div>
+  </section>
+
+  <footer id="foot">made in Bengaluru, waiting for you</footer>
+</div>
+
+<script>
+  var DEPART = new Date("2026-07-14T00:00:00+05:30").getTime();
+  var ARRIVE = new Date("2026-11-24T00:00:00+05:30").getTime();
+
+  var NICKS = ["HG","King","Kinggggg","Kinggg","broski","brosk","twin","twinnnnnn","bestie","homie","twinnn"];
+
+  var QUOTES = [
+  "You have been gone long enough that I have started narrating my day to nobody.",
+  "We met as colleagues. That lasted for a period as short as your height.",
+  "Kinya is still there, JP Nagar is still there, the matcha is still overpriced. Everything is waiting.",
+  "Platonic is not the lesser word. It is just the honest one for us.",
+  "I saw a reel today and thought: she would have shot that better.",
+  "Just come off today will ya, please?",
+  "Twinnnnnn, with all the n's, because four never felt like enough.",
+  "You are the only person whose voice notes I play twice.",
+  "The flight goes via Colombo, which is an unnecessary detour, and so were we, and look how that turned out.",
+  "You cook like it is a personality trait, and honestly it is.",
+  "There is an entire Jayanagar day sitting in my calendar with your name on it.",
+  "Some friendships need occasions. This one sails smoothly with an antique, barely alive Nothing phone. OG phone tho.",
+  "The airport was the last time our day had no time difference in it.",
+  "You are the only person who can call me out and be right about it.",
+  "Never needed you to reply fast. Always needed you to reply eventually, King.",
+  "Loving a friend this much is not a smaller thing. It is the same thing without the noise.",
+  "You would hate how quiet the good news is when you are not in person to hear it first.",
+  "Two years of standups and we came out of it with this.",
+  "Your seat at the table is unclaimed, and no, nobody else is allowed.",
+  "Bengaluru traffic has got worse. You will love complaining about it again.",
+  "The December trip only exists because you are coming back. Cause and effect.",
+  "I have stopped counting the hours ahead. I just assume you are already in tomorrow.",
+  "You are my homie in the least casual sense of that word.",
+  "If you ever wonder whether you are missed here: constantly, and by name.",
+  "Half my camera roll makes no sense without you standing in it.",
+  "You send me things at 3am your time and I take it as a compliment.",
+  "First matcha is on me. So is the second, because you will order a second.",
+  "The best part of us is that neither of us has to perform anything.",
+  "Melbourne is lucky and I hope it knows that.",
+  "I ve never had a list of things to tell you cuz you just know everything.",
+  "You are the loudest person in an empty chat.",
+  "Bestie is a soft word for something that has held up under actual weight.",
+  "The office we met in stopped mattering months ago. You did not.",
+  "I want the version of the story you tell, not the one that actually happened.",
+  "Your friendship has raised the bar and you know it.",
+  "Distance tested this and got absolutely nowhere.",
+  "Some people you keep in touch with. You, I just keep.",
+  "One day back and it will be like the timezone never existed.",
+  "You have been reeling your way across Melbourne and I have watched every single one. Gimme the private youtube channel link bro.",
+  "There is no version of my day that does not end up without your mention.",
+  "HG: two letters doing a truly unreasonable amount of work.",
+  "I would have flown the eleven hours. I just prefer that you are the one flying them.",
+  "The good thing about a best friend abroad is the countdown. The bad thing is everything else.",
+  "You know the whole story, so I never have to start from the beginning.",
+  "Shopping in Jayanagar with you takes four hours and produces no bags. Worth it.",
+  "You are the person I text before I have decided what I think.",
+  "Melbourne winters, Bengaluru evenings, same conversation, worse latency.",
+  "This is not the kind of love that needs a category. It needs showing up.",
+  "I have reels saved up for you that have been waiting weeks.",
+  "You left with half the inside jokes and they have been useless since.",
+  "Someone asked how we met and I said work and it felt like a lie.",
+  "Being known is rarer than being liked. You have done both, for years.",
+  "You are the only advertisement for Melbourne that has ever worked on me.",
+  "You would have laughed at what happened today, so I am keeping it for you.",
+  "A Colombo layover is three hours where you are technically already closer.",
+  "We are proof that the deepest one does not have to be romantic.",
+  "You are the emergency contact I never officially filled in.",
+  "COME OFF NOW!",
+  "Every time you say twinnN the day improves measurably.",
+  "I do not miss you loudly. I miss you at a constant, unhelpful volume.",
+  "November is going to feel like the good part of a long film.",
+  "You are building a life in another country and still make the time. That is the whole point.",
+  "Bob's, first week. This is not a suggestion.",
+  "Whatever this is, it outlasted the jobs that introduced us.",
+  "Varkala set a standard and December has to beat it.",
+  "You are unbothered by my worst overthinkings, which is a rare and dangerous gift.",
+  "I would rather have one of you than ten of most people.",
+  "Home is less a place than whoever picks up at 2am. You always pick up.",
+  "Melbourne borrowed you. Bengaluru is getting you back, with interest.",
+  "Nobody else gets the unedited version. You get it by default.",
+  "When are we playing pickleball again, twin?",
+  "A friendship this old stops being a choice and becomes a fact.",
+  "The countdown is under two months, which is nothing, which is still too long.",
+  "You fix my mood in one voice note and then send eleven more.",
+  "Somewhere in Melbourne you are cooking something I will only get to hear about.",
+  "King, and not ironically.",
+  "The first hug at arrivals is going to be genuinely embarrassing in public.",
+  "You are the person I would call from anywhere, at any hour, in any state.",
+  "We need a new Bangalore to-do list now, start planning.",
+  "None of this needed a label, and it still does not.",
+  "Some days the only thing that happens is your message. That is enough.",
+  "You have never once made me explain. You just knew.",
+  "I ll be advancing you from beginner to pro in swimming, in December",
+  "Twin, in the sense that half of what I think is already yours.",
+  "I will be at the airport early. Obviously.",
+  "You do the thing where you remember the small detail. Nobody else does.",
+  "Our December plan is barely a plan yet. It will still be the best trip of the year.",
+  "Platonic, permanent, and not up for discussion.",
+  "You have spent months explaining your day across a four and a half hour gap. Almost done.",
+  "There is a version of me that only exists around you, and I like him better.",
+  "Your side of every argument is annoyingly well constructed.",
+  "The distance was a logistics problem. It was never a feelings problem.",
+  "Right after you land, July will feel like something that happened to someone else.",
+  "You are my favourite person to do absolutely nothing with.",
+  "I hope Melbourne gives you everything, and I hope you are still glad to leave temporarily.",
+  "Ours is the friendship other people ask about. Let them.",
+  "Last stretch. The numbers on this page are finally small.",
+  "You left as my best friend and you are coming back as the same, which is the whole miracle.",
+  "Bar + Karaoke day waiting for us twinn",
+  "Whatever comes next, you are the constant. That is not sentiment, that is evidence.",
+  "Four days, three nights, one Varkala, and neither of us needed a break from the other.",
+  "You went into that water like the surfing was the point. The surfing was never the point.",
+  "Shavige, and then explaining shavige to me like I had never eaten anything before.",
+  "The wave at the end of a call. Nobody else on earth gets that hand movement.",
+  "We started in PWC with me shadowing you. I never really stopped.",
+  "Boss lady is not a compliment I hand out. It is just accurate.",
+  "You are dangerously late to everything and that somehow never felt wrong to me.",
+  "Kween only works because King came first.",
+  "Nobody drains less of me than you do. A whole day together and I come back full.",
+  "You have opinions about my outfits and you have always been right.",
+  "Varkala proved it. Four days alone together and we came out closer.",
+  "The daily call is the only appointment I have never once resented.",
+  "We hate the same people, which is a badly underrated foundation.",
+  "Veg pulao at yours beats anything I can order here.",
+  "You moved to another country by yourself, and I have not stopped being proud of it.",
+  "Unbothered, unashamed, completely real with each other. Most people never get that once.",
+  "The airport in July was the last time I saw you. It has been long enough now.",
+  "Your ego turns up occasionally and even that is entertaining.",
+  "Lemme guess, you pooping right now?",
+  "I do not perform anything around you, and you have never once asked me to.",
+  "I need your Chipotle wraps NOW!",
+  "You taught me to dress better without ever making it feel like a lesson.",
+  "We drank enough to test the whole thing. It held.",
+  "I still tell people you were the senior on my first project. It explains a lot about me.",
+  "Some people you meet at work. You, I got assigned to, and got lucky.",
+  "A rant with you fixes more than sleep does.",
+  "Your hand does that thing at the end of the call and the day closes properly.",
+  "Caring is your default setting, even in the weeks when you are the one struggling.",
+  "Melbourne got the boss lady. Bengaluru is owed a return.",
+  "You are the only person I can spend four days in a trip straight with and want a fifth.",
+  "I have never had to filter a sentence before saying it to you.",
+  "The reels are the evidence. Nobody fakes being that comfortable on camera.",
+  "Drunk bowling pt.2 needed asap, King.",
+  "We survived a trip alone together. That is the real test and we passed it early.",
+  "One video call almost everyday, for months, across a continent. That is not habit, that is choice.",
+  "Our friendship permanently ruined my standards and I hold you fully responsible.",
+  "You went to a new country alone. Say that out loud to yourself sometimes.",
+  "Our fights are the times I matured that much that fast.",
+  "Nobody makes a hangout as low effort and high return as you do.",
+  "We are each other's unedited draft. No cleanup, no context needed.",
+  "Surfing in Varkala, and you made it look like you had done it for years.",
+  "I have never had to introduce a mood to you. You clock it in one second.",
+  "We are the same way tonight as we did the first week you left.",
+  "If you turn up on time in December, I will genuinely be worried about you.",
+  "Best drinking buddy is not an honorary title. You earned it.",
+  "Work would have been unbearable without someone to rant to, and it was always you.",
+  "All the fights and still together. That is the proof.",
+  "I would take your fashion advice over my own instincts every single time.",
+  "Your reels have got better in Melbourne and I refuse to admit it to your face.",
+  "The PWC project ended years ago. This did not.",
+  "You call every day from another country. Most friendships do not survive a different pincode.",
+  "Caring loudly is your thing, and I have been on the receiving end of it for months.",
+  "Kween reporting in, King. Status: still waiting.",
+  "I fell deep into our friendship, best fall ever.",
+  "Curd rice, your version, always slaps.",
+  "We have never needed a third person to make a plan work.",
+  "You have been away long enough to have stories I have only heard, never seen.",
+  "I am proud of you in a way that is annoying to say out loud, so here it is in writing.",
+  "Your ego and my stubbornness have coexisted for months. Call it diplomacy.",
+  "One wave, both hands, end of call. Ridiculous, and completely non negotiable.",
+  "The first trip taught us this could be lifelong. December is the sequel.",
+  "Nobody else gets my worries at full volume.",
+  "Zero social battery drained. That is the rarest quality a person can have.",
+  "The missing is riyal, so come off soon will ya?",
+  "Wanna witness teenage Namitha irl soon.",
+  "We met on a project nobody remembers. We walked out of it with this.",
+  "Four days alone in Varkala is a background check most friendships would fail.",
+  "Every outfit I have got right this year traces back to something you said.",
+  "You have told me everything about Australia. I have told you everything about here. Even split.",
+  "Boss lady in Melbourne, boss lady in Bengaluru. Same person, longer flight.",
+  "Our videos and photos are the closest thing we have to a besties documentary.",
+  "Some friendships pause when someone moves. This one has not missed a day.",
+  "The airport goodbye in July was the hardest easy thing I have done.",
+  "You have never let me sit in a bad mood alone. Not once, not in years.",
+  "Drinking with you was never actually about the drinking.",
+  "I know exactly what you will say about half my decisions, and I still ask.",
+  "Jattu is waiting for you, come soon bro.",
+  "Stupidity by me again. Somehow forgiven again.",
+  "We da best of frens, no further comment required.",
+  "We are honest with each other in a way most people could not handle.",
+  "Melbourne has been getting the daily call. It comes home in November.",
+  "I shadowed you at work and ended up shadowing your taste as well.",
+  "Nothing about this friendship is polite, and that is the best thing about it.",
+  "Caring, unsolicited and relentless. That is the whole personality.",
+  "A trip alone together that early either ends a friendship or seals it. It sealed it.",
+  "Smirnoff Mango Chilli at Pratham's place, soon.",
+  "New country, new city, new everything, alone. That took real nerve.",
+  "One more reel when you are back, purely for the archive.",
+  "Kween needs King back for basic operational reasons.",
+  "Chipotle wraps and a rant about someone we both dislike. Perfect evening.",
+  "You do not drain me, you recharge me. At this point it is a physical property.",
+  "The bye-gesture stays, even when the timezone gets in the way.",
+  "Us together, questionable decisions, excellent company.",
+  "You never once made me feel junior, back when I literally was.",
+  "Shopping with you is a masterclass I never signed up for.",
+  "We are each other's daily update, and neither of us has skipped.",
+  "Melbourne is a chapter. Bengaluru is the book.",
+  "I already knew this friendship was going to be a long one.",
+  "Every recently good style in my wardrobe has your fingerprints on it.",
+  "The loyalty has never once wobbled. We are prime hb/hg.",
+  "Under a month now, and the talks finally happen in person.",
+  "We started the year with our secrets. We are ending the year on a trip.",
+  "Your seat at Chin Lungs has been reserved in my head since July.",
+  "Nobody rants like you, and nobody listens like you either.",
+  "The countdown has got personal. The numbers are small now.",
+  "I have a list of Melbourne stories I want told in person, not over a call.",
+  "Divided by personalities, united by poop.",
+  "You are the boss lady of a life you built abroad, alone. Own that.",
+  "Soon the call ends and you are just here.",
+  "India has no idea what is coming for it.",
+  "Your surprise is waiting, and I m eager to film them.",
+  "Surviving Varkala together qualified us for absolutely anything.",
+  "Every day closer means one less call and one more plan.",
+  "Bring the fashion sense back with you. Mine has been coasting since July.",
+  "Your mirror waits to see you at its new home, twin.",
+  "Some friendships get formal with distance. Ours only got louder.",
+  "November now. That word has been doing heavy lifting since September.",
+  "The person who taught me test instructions is the person I would call from a ditch.",
+  "I have never met anyone with a lower social cost and a higher return.",
+  "The reels resume the day you land.",
+  "You will be late to your own arrival. I have already accounted for it.",
+  "Hope I countdown to Melbourne like this next year, soon.",
+  "We rant, we laugh, we hang up, we repeat. Almost done with the hanging up part.",
+  "Proud of you is an understatement I intend to keep repeating.",
+  "The last stretch is always the slowest and I do not care anymore.",
+  "Thai Basil, Mango Sticky Rice, soon.",
+  "Zero social battery drainer, boarding a plane, coming to rescue my calendar.",
+  "The daily call has been the best part of a long year.",
+  "Weeks now, not months.",
+  "Every plan I have made for December assumes you. All of them.",
+  "You went alone and made it look like an obvious decision. It was not.",
+  "King is coming home and Kween has cleared the schedule.",
+  "The distance has been a formality for months.",
+  "I want the Melbourne stories with your hands moving, not through a screen.",
+  "Booze together when you are settled. No rush. Some rush.",
+  "This survived a shared trip, a shared job, and an entire continent.",
+  "Almost. The word finally fits.",
+  "Your seat at your office table here has felt empty on purpose.",
+  "Nothing about this year worked without you in it.",
+  "If I m late to the airport, it means I ve rubbed something on from you.",
+  "Two weeks. The number is embarrassing to celebrate and I am celebrating.",
+  "Come soon, twin. I miss us real bad.",
+  "The Taco place was the audition. Everything since has been the run.",
+  "You are the only person I have never once needed a break from.",
+  "The plane is nearly real now.",
+  "I may have a rant saved up that is too long for a call.",
+  "Boss lady returns and the group chat will feel it immediately.",
+  "Nobody gets the whole me. You do, by default.",
+  "Colombo, then Bengaluru, then normal life again.",
+  "I will not believe it until you are dangerously late to something in person.",
+  "12 days left, your birthdate number. Special yea?",
+  "Proud, and I will keep saying it until it stops sounding strange.",
+  "Days left, not weeks. Finally.",
+  "Some good things this year happened inside a video call window.",
+  "December is close enough to plan properly now.",
+  "Love you broskiii. I have said this countless times and I will say it again.",
+  "The countdown is almost out of days to count.",
+  "You built a whole life abroad and still texted me every single day.",
+  "Curd rice from my plate soon.",
+  "Reels, in person, terrible dance of mine, immediately.",
+  "Nearly. That word is doing a lot of work this week.",
+  "Melbourne kept you busy. Bengaluru and Mysuru will keep you fed.",
+  "We have not skipped a day. That is the statistic I am proudest of.",
+  "I would do the July goodbye again, knowing this is the return.",
+  "The end of this countdown looks like an arrivals gate.",
+  "All the Varkala photos and reel, remade in December, worse and better.",
+  "You are the friend other people refer to as my friend. Accurate.",
+  "Bring the fashion advice. I have made mistakes in your absence.",
+  "Single digits soon and I am not being normal about it.",
+  "The shadowing never stopped, I just do it from further away now.",
+  "Everything I have wanted to say properly gets said this month.",
+  "One boba tea, one window-shopping day, one trip. Basic requirements.",
+  "Days now.",
+  "The call happens tonight, and soon it will not have to.",
+  "You left alone. You are coming back to a whole welcome.",
+  "No hangout beats yours, and I have compared extensively.",
+  "Almost home, King.",
+  "The immigration queue is the last obstacle in five months.",
+  "Everything I ranted about survived because you listened.",
+  "December will be Varkala with better planning and worse restraint.",
+  "This is the week the number stops mattering.",
+  "Pack the fashion sense. I have needs.",
+  "Five months of daily calls end with a door opening.",
+  "You are lifelong. That got decided on a Taco shop in BTM.",
+  "Nearly at the gate.",
+  "Melbourne, thank you. Now give her back.",
+  "The wave, in person, on day one. It has to happen.",
+  "Everything is planned except how much I am going to talk.",
+  "Tomorrow, more or less. I have stopped pretending to be calm.",
+  "Twinnnnnn, and the n count goes up permanently when you land.",
+  "The reels backlog for us to do is enormous and clearing it starts immediately.",
+  "Proud, relieved, and completely out of patience.",
+  "Last full day before you fly.",
+  "Five months, one call a day, zero missed.",
+  "Be late. I will still be early.",
+  "Everything on my end is ready. Just get on the plane.",
+  "You are in the air today.",
+  "Colombo tonight, Bengaluru tomorrow, everything back to normal after.",
+  "Text me from the layover, then stop texting and sleep.",
+  "The last night of this being long distance.",
+  "You are home.",
+  "The countdown is over and the list starts today.",
+  "Ah demn man, you re so back now.",
+  "Welcome back, King. Kween has been waiting."
+];
+
+  var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+  // Anchor the day to Bengaluru time, so the same quotes show in both cities.
+  function istDate(){
+    return new Date(Date.now() + (330 + new Date().getTimezoneOffset()) * 60000);
+  }
+  function dayIndex(){
+    return Math.floor((Date.now() + 330 * 60000) / 86400000);
+  }
+
+  // day index of 10 Sep 2026, Bengaluru time: set 1 plays that day, set 2 the next, and so on
+  var FIRST_DAY = 20706;
+
+  function paintDaily(){
+    var d = dayIndex();
+    var today = istDate();
+    var stamp = today.getDate() + " " + MONTHS[today.getMonth()];
+
+    var sets = Math.floor(QUOTES.length / 4);
+    var set  = d - FIRST_DAY;
+    if (set < 0) { set = 0; }
+    if (set >= sets) { set = set % sets; }   // only if the days outlast the quotes
+
+    for (var i = 1; i <= 4; i++) {
+      var nick = NICKS[(d + i) % NICKS.length];
+      document.getElementById("q" + i).textContent = QUOTES[set * 4 + i - 1];
+      document.getElementById("m" + i).textContent = stamp + ", for " + nick;
+    }
+
+    var lead = NICKS[d % NICKS.length];
+    document.getElementById("head1").textContent = "You're coming home, " + lead;
+    document.getElementById("head2").textContent = "How far along you are, " + NICKS[(d + 1) % NICKS.length];
+    document.getElementById("head3").textContent = "The list for when you land, " + NICKS[(d + 2) % NICKS.length];
+    document.getElementById("head4").textContent = "Dates that matter, " + NICKS[(d + 3) % NICKS.length];
+    document.getElementById("foot").textContent = "made in Bengaluru, waiting for you, " + lead;
+    document.title = "You're coming home, " + lead;
+  }
+
+  function pad(n){ return n < 10 ? "0" + n : "" + n; }
+
+  function tick(){
+    var now = Date.now();
+    var ms  = ARRIVE - now;
+    var d   = Math.floor(ms / 86400000);
+    var h   = Math.floor(ms % 86400000 / 3600000);
+    var m   = Math.floor(ms % 3600000 / 60000);
+    var s   = Math.floor(ms % 60000 / 1000);
+
+    if (ms <= 0) {
+      document.getElementById("days").innerHTML = "0";
+      document.getElementById("clock").textContent = "you're home";
+      document.getElementById("stubLabel").textContent = "landed";
+    } else {
+      document.getElementById("days").innerHTML = d + ' <small>days</small>';
+      document.getElementById("clock").textContent = pad(h) + "h " + pad(m) + "m " + pad(s) + "s";
+    }
+
+    var total = ARRIVE - DEPART;
+    var pct   = Math.min(100, Math.max(0, (now - DEPART) / total * 100));
+    var gone  = Math.max(0, Math.floor((now - DEPART) / 86400000));
+
+    document.getElementById("fill").style.width = pct + "%";
+    document.getElementById("marker").style.left = pct + "%";
+    document.getElementById("gone").textContent = gone;
+    document.getElementById("left").textContent = Math.max(0, d);
+    document.getElementById("pct").textContent = Math.round(pct) + "%";
+    document.getElementById("plane").style.transform = "translateX(" + (pct * 0.62) + "px)";
+  }
+
+  var lastDay = dayIndex();
+  paintDaily();
+  tick();
+  setInterval(function(){
+    tick();
+    if (dayIndex() !== lastDay) { lastDay = dayIndex(); paintDaily(); }
+  }, 1000);
+
+  var tabs = document.querySelectorAll("nav button");
+  for (var i = 0; i < tabs.length; i++) {
+    tabs[i].addEventListener("click", function(e){
+      for (var j = 0; j < tabs.length; j++) {
+        tabs[j].setAttribute("aria-selected", "false");
+        document.getElementById(tabs[j].dataset.page).hidden = true;
+      }
+      e.currentTarget.setAttribute("aria-selected", "true");
+      document.getElementById(e.currentTarget.dataset.page).hidden = false;
+      window.scrollTo(0, 0);
+    });
+  }
+</script>
+</body>
+</html>
+
