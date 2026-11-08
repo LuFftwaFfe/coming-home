@@ -144,8 +144,10 @@
 
   .catchup .quote{margin-top:12px}
   .catchup .quote:first-of-type{margin-top:18px}
-  .catchup-img{display:block;width:100%;height:auto;margin-top:18px;border-radius:18px;border:1px dashed rgba(233,169,192,.8)}
-  .catchup-img[hidden]{display:none}
+  .catchup-photo{margin-top:22px}
+  .catchup-photo[hidden]{display:none}
+  .catchup-photo h3{margin:0 0 12px;font-family:"Fraunces",Georgia,serif;font-weight:400;font-size:17px;line-height:1.45;text-align:center}
+  .catchup-img{display:block;width:100%;height:auto;border-radius:18px;border:1px dashed rgba(233,169,192,.8)}
   footer{text-align:center;font-size:10.5px;color:var(--muted);margin-top:22px;letter-spacing:.05em}
 
   @media (prefers-reduced-motion:no-preference){
@@ -175,7 +177,10 @@
     <div class="quote"><span class="qtext" id="c2"></span><span class="qmeta" id="cm2"></span></div>
     <div class="quote"><span class="qtext" id="c3"></span><span class="qmeta" id="cm3"></span></div>
     <div class="quote"><span class="qtext" id="c4"></span><span class="qmeta" id="cm4"></span></div>
-    <img class="catchup-img" id="catchupImg" src="missed.jpg" alt="" onerror="this.hidden=true">
+    <div class="catchup-photo" id="catchupPhoto">
+      <h3>Btw, I ve been haunted by this ghost in the BG for quite a while.....</h3>
+      <img class="catchup-img" src="missed.jpg" alt="Selfie with her smiling, blurred in the background" onerror="document.getElementById('catchupPhoto').hidden=true">
+    </div>
   </section>
 
   <!-- PAGE 1 -->
