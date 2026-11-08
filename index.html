@@ -140,6 +140,12 @@
   nav button:focus-visible{outline:2px solid var(--blush-deep);outline-offset:2px}
 
   .page[hidden]{display:none}
+  nav button[hidden]{display:none}
+
+  .catchup .quote{margin-top:12px}
+  .catchup .quote:first-of-type{margin-top:18px}
+  .catchup-img{display:block;width:100%;height:auto;margin-top:18px;border-radius:18px;border:1px dashed rgba(233,169,192,.8)}
+  .catchup-img[hidden]{display:none}
   footer{text-align:center;font-size:10.5px;color:var(--muted);margin-top:22px;letter-spacing:.05em}
 
   @media (prefers-reduced-motion:no-preference){
@@ -152,11 +158,25 @@
 <div class="wrap">
 
   <nav role="tablist" aria-label="Sections">
+    <button role="tab" aria-selected="false" data-page="p0" id="tab0" hidden>You missed these</button>
     <button role="tab" aria-selected="true" data-page="p1">Countdown</button>
     <button role="tab" aria-selected="false" data-page="p2">Days apart</button>
     <button role="tab" aria-selected="false" data-page="p3">When you land</button>
     <button role="tab" aria-selected="false" data-page="p4">Dates</button>
   </nav>
+
+  <!-- CATCH-UP PAGE: shown only on CATCHUP_DAY (9 Nov 2026), with the 7 Nov quotes -->
+  <section class="page catchup" id="p0" hidden>
+    <div class="panel">
+      <h2 id="head0">You missed these</h2>
+      <p>All four from 7 November, in one place, so none of them got lost.</p>
+    </div>
+    <div class="quote"><span class="qtext" id="c1"></span><span class="qmeta" id="cm1"></span></div>
+    <div class="quote"><span class="qtext" id="c2"></span><span class="qmeta" id="cm2"></span></div>
+    <div class="quote"><span class="qtext" id="c3"></span><span class="qmeta" id="cm3"></span></div>
+    <div class="quote"><span class="qtext" id="c4"></span><span class="qmeta" id="cm4"></span></div>
+    <img class="catchup-img" id="catchupImg" src="missed.jpg" alt="" onerror="this.hidden=true">
+  </section>
 
   <!-- PAGE 1 -->
   <section class="page" id="p1">
@@ -602,6 +622,39 @@
     card.hidden = false;
   }
 
+  // Catch-up page: on 9 Nov 2026 (Bengaluru time) the 7 Nov set (set 58, the four
+  // quotes she missed) gets its own tab, opened first, with a photo below.
+  // Every other day the tab is hidden and the site behaves as before.
+  var CATCHUP_DAY = 20766;   // day index of 9 Nov 2026, Bengaluru time
+  var CATCHUP_SET = 58;      // day index 20764 = 7 Nov 2026
+
+  function showPage(id){
+    var tabs = document.querySelectorAll("nav button");
+    for (var j = 0; j < tabs.length; j++) {
+      var on = tabs[j].dataset.page === id;
+      tabs[j].setAttribute("aria-selected", on ? "true" : "false");
+      document.getElementById(tabs[j].dataset.page).hidden = !on;
+    }
+  }
+
+  function paintCatchup(d){
+    var tab = document.getElementById("tab0");
+    var active = d === CATCHUP_DAY;
+    if (active) {
+      for (var i = 1; i <= 4; i++) {
+        document.getElementById("c" + i).textContent = QUOTES[CATCHUP_SET * 4 + i - 1];
+        document.getElementById("cm" + i).textContent = "from 7 November, for " + NICKS[(d + i) % NICKS.length];
+      }
+      document.getElementById("head0").textContent = "You missed these, " + NICKS[d % NICKS.length];
+      if (tab.hidden) { tab.hidden = false; showPage("p0"); }
+    } else if (!tab.hidden) {
+      var wasOpen = !document.getElementById("p0").hidden;
+      tab.hidden = true;
+      document.getElementById("p0").hidden = true;
+      if (wasOpen) { showPage("p1"); }
+    }
+  }
+
   function paintDaily(){
     var d = dayIndex();
     var today = istDate();
@@ -619,6 +672,7 @@
     }
 
     paintBonus(d, stamp);
+    paintCatchup(d);
 
     var lead = NICKS[d % NICKS.length];
     document.getElementById("head1").textContent = "You're coming home, " + lead;
@@ -660,7 +714,16 @@
     document.getElementById("plane").style.transform = "translateX(" + (pct * 0.62) + "px)";
   }
 
-  var lastDay = dayIndex();
+  var lastDay;
+  var tabs = document.querySelectorAll("nav button");
+  for (var i = 0; i < tabs.length; i++) {
+    tabs[i].addEventListener("click", function(e){
+      showPage(e.currentTarget.dataset.page);
+      window.scrollTo(0, 0);
+    });
+  }
+
+  lastDay = dayIndex();
   paintDaily();
   tick();
   setInterval(function(){
@@ -668,18 +731,6 @@
     if (dayIndex() !== lastDay) { lastDay = dayIndex(); paintDaily(); }
   }, 1000);
 
-  var tabs = document.querySelectorAll("nav button");
-  for (var i = 0; i < tabs.length; i++) {
-    tabs[i].addEventListener("click", function(e){
-      for (var j = 0; j < tabs.length; j++) {
-        tabs[j].setAttribute("aria-selected", "false");
-        document.getElementById(tabs[j].dataset.page).hidden = true;
-      }
-      e.currentTarget.setAttribute("aria-selected", "true");
-      document.getElementById(e.currentTarget.dataset.page).hidden = false;
-      window.scrollTo(0, 0);
-    });
-  }
 </script>
 </body>
 </html>
